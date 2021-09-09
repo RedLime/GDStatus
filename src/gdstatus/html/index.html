@@ -7,6 +7,7 @@
     <meta charset="utf-8">
     <meta name="author" content="RedLime">
     <meta name="description" content="Check the Geometry Dash Server Status">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <meta property="og:image" content="https://i.imgur.com/0jYOjml.png">
     <meta property="og:description" content="Check the Geometry Dash Server Status">
     <meta property="og:title" content="GDStatus">
@@ -51,7 +52,7 @@
         Incidents notices may be delayed. (eg I am sleeping)<br>
         Due to problems with my server, the GD server status display can sometimes be inaccurate.<br><br>
         Discord : RedLime#0817<br>
-        Github Repository : <a href="https://github.com/RedLime/GDStatus" target="_blank">Link</a><br>
+        Github Repository : <a href="https://github.com/RedLime/GDStatus" target="_blank">Link</a><br><br>
         <a href="https://www.patreon.com/bePatron?u=43961487" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
     </div>
     <div style="width: 70%; margin: 30px auto 120px auto;"></div>
@@ -204,6 +205,10 @@
 
     searchChart.canvas.parentNode.style.width = isMobile ? '90%' : '60%'; 
     downloadChart.canvas.parentNode.style.width = isMobile ? '90%' : '60%'; 
+    if (isMobile) {
+        searchOptions.aspectRatio = 3;
+        downloadOptions.aspectRatio = 3;
+    }
 
     const getAPI = (amount, target) => {
         [...document.getElementsByClassName(`button-selected`)].filter(ele => ele.id.includes(target))[0].classList.remove('button-selected');
