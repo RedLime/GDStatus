@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <form action="../update/[[PASSWORD]]" method="post">
+        <label for="type">Enter type: </label>
+        <select name="type">
+            <option value="announcement">announcement</option>
+            <option value="issue">issue</option>
+            <option value="update">update</option>
+            <option value="solved">solved</option>
+        </select>
+        <label for="context">Enter context: </label>
+        <textarea name="context" required></textarea>
+        <input type="submit" value="Add Incidents">
+    </form>
+</body>
+
+</html>

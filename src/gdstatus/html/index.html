@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GDStatus</title>
+    <link rel="icon" type="image/gif/png" href="https://i.imgur.com/0jYOjml.png">
+    <meta charset="utf-8">
+    <meta name="author" content="RedLime">
+    <meta name="description" content="Check the Geometry Dash Server Status">
+    <meta property="og:image" content="https://i.imgur.com/0jYOjml.png">
+    <meta property="og:description" content="Check the Geometry Dash Server Status">
+    <meta property="og:title" content="GDStatus">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
+</head>
+
+<body>
+    <div class='title' style="width: 80%;text-align: center;margin-left: auto;margin-right: auto;">
+        <img src="https://i.imgur.com/X58AO46.png", style="width: 100%;"/>
+    </div>
+    [[STATUS]]
+    <div style="position: relative; width: 60vw; margin: 0 auto;">
+        <h2 class="title">Level Search Sesponse Time</h2>
+        <canvas id="searchChart"></canvas>
+        <div style="display: inline-flex;">
+            <div id="search-0" class="button button-selected" onclick="getAPI(0, 'search')">Hours</div>
+            <div id="search-1" class="button" onclick="getAPI(1, 'search')">Day</div>
+            <div id="search-2" class="button" onclick="getAPI(2, 'search')">Week</div>
+        </div>
+    </div>
+    <div style="position: relative; width: 60vw; margin: 0 auto;">
+        <h2 class="title">Level Download Sesponse Time</h2>
+        <canvas id="downloadChart"></canvas>
+        <div style="display: inline-flex;">
+            <div id="download-0" class="button button-selected" onclick="getAPI(0, 'download')">Hours</div>
+            <div id="download-1" class="button" onclick="getAPI(1, 'download')">Day</div>
+            <div id="download-2" class="button" onclick="getAPI(2, 'download')">Week</div>
+        </div>
+    </div>
+    <h2 class="title">Past Incidents</h2>
+    <div id='incidents'>[[INCIDENT]]</div>
+    <div class='underline title' style="width: 70%; margin: 30px auto; margin-top: 60px;"></div>
+    <h2 class="title">How it works?</h2>
+    <div style="text-align: center; line-height: 1.5em;">
+        It's simple. It request to GD server by regular intervals for check the status.<br>
+        Recent server issues (such as DDoS or maintenance) or updates are in Past Incidents.<br><br>
+        Search R.T. is based on Level Search in Most Downloads page 1.<br>
+        Download R.T. is based on Yatagarasu(28220417) download.<br><br>
+        <strong>THIS IS NOT OFFICIAL SITE!</strong><br>
+        Incidents notices may be delayed. (eg I am sleeping)<br>
+        Due to problems with my server, the GD server status display can sometimes be inaccurate.<br><br>
+        Discord : RedLime#0817<br><br>
+        <a href="https://www.patreon.com/bePatron?u=43961487" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
+    </div>
+    <div style="width: 70%; margin: 30px auto 120px auto;"></div>
+</body>
+<script>
+    const download = [JSON.parse(`[[DOWNLOAD]]`)];
+    const search = [JSON.parse(`[[SEARCH]]`)];
+    const isMobile = navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/BlackBerry/i) || navigator.userAgent.match(/Windows Phone/i) ? true : false;
+
+
+    let width, height, gradient;
+    function getGradient(ctx, chartArea) {
+        const chartWidth = chartArea.right - chartArea.left;
+        const chartHeight = chartArea.bottom - chartArea.top;
+        if (gradient === null || width !== chartWidth || height !== chartHeight) {
+            // Create the gradient because this is either the first render
+            // or the size of the chart has changed
+            width = chartWidth;
+            height = chartHeight;
+            gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+            gradient.addColorStop(0, "rgb(75, 192, 192)");
+            gradient.addColorStop(0.5, "rgb(255, 205, 86)");
+            gradient.addColorStop(0.8, "rgb(255, 99, 132)");
+            gradient.addColorStop(1, "rgb(0, 0, 0)");
+        }
+
+        return gradient;
+    }
+
+    function getLabelText(ctx) {
+        return ctx.parsed.y == 0 ? "Timeout" : ctx.parsed.y == -1 ? "Can't connect" : ctx.formattedValue+"ms";
+    }
+
+
+    const getData = (arr) => {
+        return {
+            datasets: [
+                {
+                    data: arr.map((s) => {
+                        return {x: new Date(s.res_timestamp), y: !s.res_result ? -1 : s.res_time > 10000 ? 0 : s.res_time};
+                    }),
+                    borderColor: function (context) {
+                        if (context?.parsed?.y == -1) return 'rgb(0,0,0,0.3)';
+                        const chart = context.chart;
+                        const { ctx, chartArea } = chart;
+
+                        if (!chartArea) return null;
+                        return getGradient(ctx, chartArea);
+                    },
+                    segment: {
+                        borderColor: ctx => {
+                            return ctx.p0.parsed.y == 0 || ctx.p1.parsed.y == 0 ? 'rgb(0,0,0,0.3)' 
+                                : ctx.p0.parsed.y == -1 || ctx.p1.parsed.y == -1 ? 'rgb(185,0,0,0.3)' : undefined
+                        },
+                        borderDash: ctx => {
+                            return ctx.p0.parsed.y <= 0 || ctx.p1.parsed.y <= 0 ? [6, 6] : undefined
+                        }
+                    },
+                }
+            ],
+        };
+    };
+
+
+    const searchOptions = {
+        aspectRatio: 6,
+        fill: false,
+        radius: 0,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    label: getLabelText
+                }
+            }
+        },
+        scales: {
+            x: {
+                type: 'time',
+                time: {
+                    tooltipFormat: 'MMM DD, HH:mm',
+                    stepSize: 30
+                }
+            },
+            y: {
+                min: 0,
+                suggestedMax: 1000,
+                ticks: {
+                    callback: (value, index, values) => value + "ms"
+                },
+            }
+        },
+    };
+    const downloadOptions = {
+        aspectRatio: 6,
+        fill: false,
+        radius: 0,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    label: getLabelText
+                }
+            }
+        },
+        scales: {
+            x: {
+                type: 'time',
+                time: {
+                    tooltipFormat: 'MMM DD, HH:mm',
+                    stepSize: 30
+                }
+            },
+            y: {
+                min: 0,
+                suggestedMax: 2500,
+                ticks: {
+                    callback: (value, index, values) => value + "ms"
+                },
+            }
+        },
+    };
+
+    Chart.defaults.font.family = 'Nanum Gothic';
+    Chart.defaults.color = '#404244';
+
+    const searchChart = new Chart(document.getElementById("searchChart").getContext('2d'), {
+        type: "line",
+        data: getData(search[0]),
+        options: searchOptions
+    });
+
+    const downloadChart = new Chart(document.getElementById("downloadChart").getContext('2d'), {
+        type: "line",
+        data: getData(download[0]),
+        options: downloadOptions,
+    });
+
+    searchChart.canvas.parentNode.style.width = isMobile ? '90%' : '60%'; 
+    downloadChart.canvas.parentNode.style.width = isMobile ? '90%' : '60%'; 
+
+    const getAPI = (amount, target) => {
+        [...document.getElementsByClassName(`button-selected`)].filter(ele => ele.id.includes(target))[0].classList.remove('button-selected');
+        document.getElementById(`${target}-${amount}`).classList.add('button-selected');
+        if (target == 'search' && search[amount]) {
+            updateChart(searchChart, search, amount);
+            return;
+        }
+        if (target == 'download' && download[amount]) {
+            updateChart(downloadChart, download, amount);
+            return;
+        }
+
+        httpRequest = new XMLHttpRequest();
+
+        if (!httpRequest) {
+            alert('Giving up :( Cannot create an XMLHTTP instance');
+            return;
+        }
+        httpRequest.onreadystatechange = () => {
+            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (httpRequest.status === 200) {
+                    if (target == 'search') {
+                        search[amount] = JSON.parse(httpRequest.responseText);
+                        updateChart(searchChart, search, amount);
+                    } else {
+                        download[amount] = JSON.parse(httpRequest.responseText);
+                        updateChart(downloadChart, download, amount);
+                    }
+                } else {
+                    alert('There was a problem with the request.');
+                }
+            }
+        };
+        httpRequest.open('GET', '/api/responses/'+target+'/'+typeToAmount(amount));
+        httpRequest.send();
+    }
+
+    const updateChart = (chart, data, target1) => {
+        chart.data = getData(data[target1]);
+        if (target1 == 0) {
+            chart.options.scales.x.time.stepSize = 30;
+            chart.options.scales.x.time.minUnit = 'minute';
+        } else if (target1 == 1) {
+            chart.options.scales.x.time.stepSize = 4;
+            chart.options.scales.x.time.minUnit = 'hour';
+        } else {
+            chart.options.scales.x.time.stepSize = 1;
+            chart.options.scales.x.time.minUnit = 'day';
+        }
+        chart.update();
+    }
+
+    const typeToAmount = (target1) => {
+        if (target1 == 1) return 1000*60*60;
+        if (target1 == 2) return 1000*60*60*6;
+        return 1000*60*5;
+    }
+</script>
+
+<style>
+@import url('https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700,800');
+@import url('https://allfont.net/allfont.css?fonts=pusab');
+
+* {
+    font-family : 'Nanum Gothic';
+    color: #404244;
+}
+
+#incidents {
+    width: 90%;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.title {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.incident {
+    margin-top: 20px;
+}
+
+.incident-date {
+    font-size: 1.25em;
+    font-weight: 800;
+    padding-bottom: 3px;
+    margin-bottom: 10px;
+}
+
+.underline {
+    border-style: solid;
+    border-color: #c7c7c7;
+    border-width: 0 0 1px 0;
+}
+
+.incident-context {
+    font-weight: 500;
+}
+
+.button {
+    border-color: rgb(73, 73, 255);
+    border-width: 2px;
+    margin: 5px;
+    padding: 5px;
+    border-style: groove;
+    border-radius: 12px;
+    width: 50px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.button-selected {
+    background-color: rgb(73, 73, 255);
+    color: white;
+}
+
+#status {
+    width: 50%;
+    font-size: 1.2em;
+    margin: 25px auto 40px auto;
+    color: white;
+    font-weight: 900;
+    padding: 10px 10px 10px 25px;
+    border-radius: 8px;
+}
+
+.status-normal {
+    background-color: #3BA55C;
+}
+
+.status-warn {
+    background-color: #db8f00;
+}
+
+.status-timeout {
+    background-color: #da0303;
+}
+
+.status-error {
+    background-color: #4d4d4d;
+}
+
+.incident-type {
+    border-radius: 1em;
+    font-size: 0.85rem;
+    padding: 5px 10px;
+    text-transform: uppercase;
+    width: fit-content;
+    margin-bottom: 10px;
+    font-weight: 900;
+}
+
+.incident-type-announcement {
+    background-color: rgb(76, 76, 201);
+    color: white;
+}
+
+.incident-type-issue {
+    background-color: rgb(255, 38, 0);
+    color: white;
+}
+
+.incident-type-solved {
+    background-color: rgb(0, 163, 0);
+    color: white;
+}
+
+.incident-type-update {
+    background-color: rgb(155, 31, 192);
+    color: white;
+}
+
+</style>
+
+</html>

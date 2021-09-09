@@ -1,0 +1,25 @@
+{
+  "name": "gdstatus",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node --experimental-json-modules app.js"
+  },
+  "author": "RedLime",
+  "license": "MIT",
+  "dependencies": {
+    "connect-history-api-fallback": "^1.6.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.3.0",
+    "morgan": "^1.10.0",
+    "mysql2": "^2.3.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0"
+  },
+  "type": "module"
+}

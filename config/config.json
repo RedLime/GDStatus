@@ -1,0 +1,13 @@
+{
+    "gd_server_url": "http://boomlings.com/database/",
+    "gd_server_level_id": 28220417,
+    "gd_server_cache_period": 5,
+    "web_port": 8080,
+    "incident_password": "password",
+    "mysql_host": "localhost",
+    "mysql_port": 3306,
+    "mysql_database": "database_name",
+    "mysql_user": "user_name",
+    "mysql_password": "db_password",
+    "debug": false
+}
