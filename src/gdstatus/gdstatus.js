@@ -56,7 +56,7 @@ const cachingServer = async () => {
 
 setInterval(() => {
     const nowMinutes = Math.ceil(new Date().getTime() / (1000 * 60))
-    if (nowMinutes % config.gd_server_cache_period == 0) {
+    if (nowMinutes % config.gd_server_cache_period == 1) {
         cachingServer();
     }
 }, 1000 * 60);
