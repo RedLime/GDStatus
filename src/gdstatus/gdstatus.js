@@ -9,7 +9,7 @@ export function setConnection(conn) {
 }
 
 //Start caching
-setInterval(async () => {
+const cachingServer = async () => {
     if (config.debug) return;
 
     const timeDate = Date.now();
@@ -24,7 +24,8 @@ setInterval(async () => {
     request({
         method: 'POST',
         uri: config.gd_server_url+"getGJLevels21.php",
-        form: form
+        form: form,
+        timeout: 60000,
     }, (error, response, body) => {
         if (error || !body || body == "-1") {
             connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (0, ${300}, 0, ${Date.now()})`)
@@ -39,7 +40,8 @@ setInterval(async () => {
     request({
         method: 'POST',
         uri: config.gd_server_url+"downloadGJLevel22.php",
-        form: form
+        form: form,
+        timeout: 60000,
     }, (error, response, body) => {
         if (error || !body || body == "-1") {
             connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (1, ${Date.now() - timeDate}, 0, ${Date.now()})`)
@@ -49,7 +51,15 @@ setInterval(async () => {
             connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (1, ${Date.now() - timeDate}, 1, ${Date.now()})`)
         }
     });
-}, config.gd_server_cache_period * 1000 * 60);
+};
+
+
+setInterval(() => {
+    const nowMinutes = Math.ceil(new Date().getTime() / (1000 * 60))
+    if (nowMinutes % config.gd_server_cache_period == 0) {
+        cachingServer();
+    }
+}, 1000 * 60);
 
 
 router.get('/', async (req, res) => {
