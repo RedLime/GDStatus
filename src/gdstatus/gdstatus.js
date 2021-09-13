@@ -28,11 +28,11 @@ const cachingServer = async () => {
         timeout: 60000,
     }, (error, response, body) => {
         if (error || !body || body == "-1") {
-            connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (0, ${300}, 0, ${Date.now()})`)
+            connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (0, ${300}, 2, ${Date.now()})`)
         } else if (Date.now() - timeDate > 10000) {
-            connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (0, ${Date.now() - timeDate}, 2, ${Date.now()})`)
-        } else {
             connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (0, ${Date.now() - timeDate}, 1, ${Date.now()})`)
+        } else {
+            connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (0, ${Date.now() - timeDate}, 0, ${Date.now()})`)
         }
     });
     
@@ -44,11 +44,11 @@ const cachingServer = async () => {
         timeout: 60000,
     }, (error, response, body) => {
         if (error || !body || body == "-1") {
-            connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (1, ${Date.now() - timeDate}, 0, ${Date.now()})`)
-        } else if (Date.now() - timeDate > 10000) {
             connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (1, ${Date.now() - timeDate}, 2, ${Date.now()})`)
-        } else {
+        } else if (Date.now() - timeDate > 10000) {
             connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (1, ${Date.now() - timeDate}, 1, ${Date.now()})`)
+        } else {
+            connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (1, ${Date.now() - timeDate}, 0, ${Date.now()})`)
         }
     });
 };
@@ -63,9 +63,9 @@ setInterval(() => {
 
 
 router.get('/', async (req, res) => {
-    const [search] = await connection.query(`SELECT res_time, res_result, res_timestamp FROM responses WHERE req_type = 0 ORDER BY res_timestamp DESC LIMIT 36`);
-    const [download] = await connection.query(`SELECT res_time, res_result, res_timestamp FROM responses WHERE req_type = 1 ORDER BY res_timestamp DESC LIMIT 36`);
-    const [incidents] = await connection.query(`SELECT message, update_time, type FROM incidents ORDER BY update_time DESC LIMIT 10`);
+    const [search] = await connection.query(`SELECT res_time, res_result, res_timestamp FROM responses WHERE req_type = 0 ORDER BY res_timestamp DESC LIMIT 72`);
+    const [download] = await connection.query(`SELECT res_time, res_result, res_timestamp FROM responses WHERE req_type = 1 ORDER BY res_timestamp DESC LIMIT 72`);
+    const [incidents] = await connection.query(`SELECT message, update_time, type FROM incidents ORDER BY update_time DESC LIMIT 15`);
 
     let html = fs.readFileSync('./src/gdstatus/html/index.html', 'utf-8');
 
@@ -84,7 +84,7 @@ router.get('/', async (req, res) => {
     
     const firstStatus = download[0];
     const getStatus = () => {
-        if (!firstStatus.res_result) {
+        if (firstStatus.res_result == 2) {
             return `<div id='status' class='status-error'>Can't connect to server. Server may be under maintenance.</div>`;
         }
         if (firstStatus.res_time < 3000) {

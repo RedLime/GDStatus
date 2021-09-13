@@ -83,7 +83,15 @@
     }
 
     function getLabelText(ctx) {
-        return ctx.parsed.y == 0 ? "Timeout" : ctx.parsed.y == -1 ? "Can't connect" : ctx.formattedValue+"ms";
+        return ctx.parsed.y == 0 ? "Timeout" : ctx.parsed.y == 0.01 ? "Can't connect" : ctx.formattedValue+"ms";
+    }
+
+    function checkNextInvaild(ctx) {
+        const defaultValue = 0;
+        const  {dataset, dataIndex } = ctx;
+        if (dataIndex < 1 || dataIndex >= dataset.data.length) return defaultValue;
+        if (ctx.parsed.y > 0.01 && (ctx.dataset.data[dataIndex - 1]?.y <= 0.01 || ctx.dataset.data[dataIndex + 1]?.y <= 0.01)) return 2.5;
+        return defaultValue;
     }
 
 
@@ -92,10 +100,18 @@
             datasets: [
                 {
                     data: arr.map((s) => {
-                        return {x: new Date(s.res_timestamp), y: !s.res_result ? -1 : s.res_time > 10000 ? 0 : s.res_time};
+                        return {x: new Date(s.res_timestamp), y: s.res_result == 2 ? 0.01 : s.res_time > 10000 ? 0 : s.res_time};
                     }),
                     borderColor: function (context) {
-                        if (context?.parsed?.y == -1) return 'rgb(0,0,0,0.3)';
+                        const chart = context.chart;
+                        const { ctx, chartArea } = chart;
+
+                        if (!chartArea) return null;
+                        return getGradient(ctx, chartArea);
+                    },
+                    pointRadius: checkNextInvaild,
+                    pointBackgroundColor: function (context) {
+                        if (context?.parsed?.y <= 0.01) return 'rgb(0,0,0,0.1)';
                         const chart = context.chart;
                         const { ctx, chartArea } = chart;
 
@@ -105,10 +121,10 @@
                     segment: {
                         borderColor: ctx => {
                             return ctx.p0.parsed.y == 0 || ctx.p1.parsed.y == 0 ? 'rgb(0,0,0,0.3)' 
-                                : ctx.p0.parsed.y == -1 || ctx.p1.parsed.y == -1 ? 'rgb(185,0,0,0.3)' : undefined
+                                : ctx.p0.parsed.y == 0.01 || ctx.p1.parsed.y == 0.01 ? 'rgb(185,0,0,0.3)' : undefined
                         },
                         borderDash: ctx => {
-                            return ctx.p0.parsed.y <= 0 || ctx.p1.parsed.y <= 0 ? [6, 6] : undefined
+                            return ctx.p0.parsed.y <= 0.01 || ctx.p1.parsed.y <= 0.01 ? [6, 6] : undefined
                         }
                     },
                 }
@@ -263,9 +279,9 @@
     }
 
     const typeToAmount = (target1) => {
-        if (target1 == 1) return 1000*60*60;
-        if (target1 == 2) return 1000*60*60*6;
-        return 1000*60*5;
+        if (target1 == 1) return 20;
+        if (target1 == 2) return 60*3;
+        return 5;
     }
 </script>
 
