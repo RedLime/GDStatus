@@ -11,14 +11,14 @@
     <meta property="og:image" content="https://i.imgur.com/0jYOjml.png">
     <meta property="og:description" content="Check the Geometry Dash Server Status">
     <meta property="og:title" content="GDStatus">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
 </head>
 
 <body>
     <div class='title' style="width: 80%;text-align: center;margin-left: auto;margin-right: auto;">
-        <img src="https://i.imgur.com/X58AO46.png", style="width: 100%;"/>
+        <img src="https://i.imgur.com/Qksn3W3.png" , style="width: 100%;" />
     </div>
     [[STATUS]]
     <div style="position: relative; width: 60vw; margin: 0 auto;">
@@ -53,7 +53,9 @@
         Due to problems with my server, the GD server status display can sometimes be inaccurate.<br><br>
         Discord : RedLime#0817<br>
         Github Repository : <a href="https://github.com/RedLime/GDStatus" target="_blank">Link</a><br><br>
-        <a href="https://www.patreon.com/bePatron?u=43961487" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
+        <a href="https://www.patreon.com/bePatron?u=43961487" data-patreon-widget-type="become-patron-button">Become a
+            Patron!</a>
+        <script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
     </div>
     <div style="width: 70%; margin: 30px auto 120px auto;"></div>
 </body>
@@ -83,12 +85,12 @@
     }
 
     function getLabelText(ctx) {
-        return ctx.parsed.y == 0 ? "Timeout" : ctx.parsed.y == 0.01 ? "Can't connect" : ctx.formattedValue+"ms";
+        return ctx.parsed.y == 0 ? "Timeout" : ctx.parsed.y == 0.01 ? "Can't connect" : ctx.formattedValue + "ms";
     }
 
     function checkNextInvaild(ctx) {
         const defaultValue = 0;
-        const  {dataset, dataIndex } = ctx;
+        const { dataset, dataIndex } = ctx;
         if (dataIndex < 1 || dataIndex >= dataset.data.length) return defaultValue;
         if (ctx.parsed.y > 0.01 && (ctx.dataset.data[dataIndex - 1]?.y <= 0.01 || ctx.dataset.data[dataIndex + 1]?.y <= 0.01)) return 2.5;
         return defaultValue;
@@ -100,7 +102,7 @@
             datasets: [
                 {
                     data: arr.map((s) => {
-                        return {x: new Date(s.res_timestamp), y: s.res_result == 2 ? 0.01 : s.res_time > 10000 ? 0 : s.res_time};
+                        return { x: new Date(s.res_timestamp), y: s.res_result == 2 ? 0.01 : s.res_time > 10000 ? 0 : s.res_time };
                     }),
                     borderColor: function (context) {
                         const chart = context.chart;
@@ -120,8 +122,8 @@
                     },
                     segment: {
                         borderColor: ctx => {
-                            return ctx.p0.parsed.y == 0 || ctx.p1.parsed.y == 0 ? 'rgb(0,0,0,0.3)' 
-                                : ctx.p0.parsed.y == 0.01 || ctx.p1.parsed.y == 0.01 ? 'rgb(185,0,0,0.3)' : undefined
+                            return ctx.p0.parsed.y == 0 || ctx.p1.parsed.y == 0 ? '#b2b2b2'
+                                : ctx.p0.parsed.y == 0.01 || ctx.p1.parsed.y == 0.01 ? '#eab2b2' : undefined
                         },
                         borderDash: ctx => {
                             return ctx.p0.parsed.y <= 0.01 || ctx.p1.parsed.y <= 0.01 ? [6, 6] : undefined
@@ -199,14 +201,22 @@
                 suggestedMax: 2500,
                 ticks: {
                     callback: (value, index, values) => value + "ms"
-                },
+                }
             }
         },
     };
 
+    //Chart Font
     Chart.defaults.font.family = 'Nanum Gothic';
-    Chart.defaults.color = '#404244';
+    
+    //Dark Mode
+    let prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: Dark)').matches;
+    const colorDarkMode = () => {
+        return prefersDark ? '#888' : '#444';
+    }
+    Chart.defaults.color = colorDarkMode();
 
+    //Create Chart
     const searchChart = new Chart(document.getElementById("searchChart").getContext('2d'), {
         type: "line",
         data: getData(search[0]),
@@ -219,8 +229,9 @@
         options: downloadOptions,
     });
 
-    searchChart.canvas.parentNode.style.width = isMobile ? '90%' : '60%'; 
-    downloadChart.canvas.parentNode.style.width = isMobile ? '90%' : '60%'; 
+    //For Mobile Layout
+    searchChart.canvas.parentNode.style.width = isMobile ? '90%' : '60%';
+    downloadChart.canvas.parentNode.style.width = isMobile ? '90%' : '60%';
     if (isMobile) {
         searchOptions.aspectRatio = 3;
         downloadOptions.aspectRatio = 3;
@@ -259,7 +270,7 @@
                 }
             }
         };
-        httpRequest.open('GET', '/api/responses/'+target+'/'+typeToAmount(amount));
+        httpRequest.open('GET', '/api/responses/' + target + '/' + typeToAmount(amount));
         httpRequest.send();
     }
 
@@ -286,119 +297,124 @@
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700,800');
-@import url('https://allfont.net/allfont.css?fonts=pusab');
+    @import url('https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700,800');
 
-* {
-    font-family : 'Nanum Gothic';
-    color: #404244;
-}
+    * {
+        font-family: 'Nanum Gothic';
+        color: #404244;
+    }
 
-#incidents {
-    width: 90%;
-    max-width: 850px;
-    margin: 0 auto;
-}
+    #incidents {
+        width: 90%;
+        max-width: 850px;
+        margin: 0 auto;
+    }
 
-.title {
-    text-align: center;
-    margin-top: 50px;
-}
+    .title {
+        text-align: center;
+        margin-top: 50px;
+    }
 
-.incident {
-    margin-top: 20px;
-}
+    .incident {
+        margin-top: 20px;
+    }
 
-.incident-date {
-    font-size: 1.25em;
-    font-weight: 800;
-    padding-bottom: 3px;
-    margin-bottom: 10px;
-}
+    .incident-date {
+        font-size: 1.25em;
+        font-weight: 800;
+        padding-bottom: 3px;
+        margin-bottom: 10px;
+    }
 
-.underline {
-    border-style: solid;
-    border-color: #c7c7c7;
-    border-width: 0 0 1px 0;
-}
+    .underline {
+        border-style: solid;
+        border-color: #c7c7c7;
+        border-width: 0 0 1px 0;
+    }
 
-.incident-context {
-    font-weight: 500;
-}
+    .incident-context {
+        font-weight: 500;
+    }
 
-.button {
-    border-color: rgb(73, 73, 255);
-    border-width: 2px;
-    margin: 5px;
-    padding: 5px;
-    border-style: groove;
-    border-radius: 12px;
-    width: 50px;
-    text-align: center;
-    cursor: pointer;
-}
+    .button {
+        border-color: rgb(73, 73, 255);
+        border-width: 2px;
+        margin: 5px;
+        padding: 5px;
+        border-style: groove;
+        border-radius: 12px;
+        width: 50px;
+        text-align: center;
+        cursor: pointer;
+    }
 
-.button-selected {
-    background-color: rgb(73, 73, 255);
-    color: white;
-}
+    .button-selected {
+        background-color: rgb(73, 73, 255);
+        color: white;
+    }
 
-#status {
-    width: 50%;
-    font-size: 1.2em;
-    margin: 25px auto 40px auto;
-    color: white;
-    font-weight: 900;
-    padding: 10px 10px 10px 25px;
-    border-radius: 8px;
-}
+    #status {
+        width: 50%;
+        font-size: 1.2em;
+        margin: 25px auto 40px auto;
+        color: white;
+        font-weight: 900;
+        padding: 10px 10px 10px 25px;
+        border-radius: 8px;
+    }
 
-.status-normal {
-    background-color: #3BA55C;
-}
+    .status-normal {
+        background-color: #3BA55C;
+    }
 
-.status-warn {
-    background-color: #db8f00;
-}
+    .status-warn {
+        background-color: #db8f00;
+    }
 
-.status-timeout {
-    background-color: #da0303;
-}
+    .status-timeout {
+        background-color: #da0303;
+    }
 
-.status-error {
-    background-color: #4d4d4d;
-}
+    .status-error {
+        background-color: #4d4d4d;
+    }
 
-.incident-type {
-    border-radius: 1em;
-    font-size: 0.85rem;
-    padding: 5px 10px;
-    text-transform: uppercase;
-    width: fit-content;
-    margin-bottom: 10px;
-    font-weight: 900;
-}
+    .incident-type {
+        border-radius: 1em;
+        font-size: 0.85rem;
+        padding: 5px 10px;
+        text-transform: uppercase;
+        width: fit-content;
+        margin-bottom: 10px;
+        font-weight: 900;
+    }
 
-.incident-type-announcement {
-    background-color: rgb(76, 76, 201);
-    color: white;
-}
+    .incident-type-announcement {
+        background-color: rgb(76, 76, 201);
+        color: white;
+    }
 
-.incident-type-issue {
-    background-color: rgb(255, 38, 0);
-    color: white;
-}
+    .incident-type-issue {
+        background-color: rgb(255, 38, 0);
+        color: white;
+    }
 
-.incident-type-solved {
-    background-color: rgb(0, 163, 0);
-    color: white;
-}
+    .incident-type-solved {
+        background-color: rgb(0, 163, 0);
+        color: white;
+    }
 
-.incident-type-update {
-    background-color: rgb(155, 31, 192);
-    color: white;
-}
+    .incident-type-update {
+        background-color: rgb(155, 31, 192);
+        color: white;
+    }
 
+    @media (prefers-color-scheme: dark) {
+        * {
+            background-color: #1c2128;
+            color: #adbac7;
+        }
+    }
 </style>
 
 </html>
