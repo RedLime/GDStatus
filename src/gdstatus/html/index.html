@@ -102,7 +102,7 @@
             datasets: [
                 {
                     data: arr.map((s) => {
-                        return { x: new Date(s.res_timestamp), y: s.res_result == 2 ? 0.01 : s.res_time > 10000 ? 0 : s.res_time };
+                        return { x: new Date(s.res_timestamp), y: s.res_result == 2 ? 0.01 : s.res_result == 1 ? 0 : s.res_time };
                     }),
                     borderColor: function (context) {
                         const chart = context.chart;
@@ -319,7 +319,7 @@
         margin-top: 20px;
     }
 
-    .incident-date {
+    .incident-number {
         font-size: 1.25em;
         font-weight: 800;
         padding-bottom: 3px;
@@ -407,6 +407,13 @@
     .incident-type-update {
         background-color: rgb(155, 31, 192);
         color: white;
+    }
+    
+    .incident-date {
+        font-size: 0.85em;
+        color: white;
+        vertical-align: text-top;
+        margin-left: 1em;
     }
 
     @media (prefers-color-scheme: dark) {

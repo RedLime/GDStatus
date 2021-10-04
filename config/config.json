@@ -9,5 +9,6 @@
     "mysql_database": "database_name",
     "mysql_user": "user_name",
     "mysql_password": "db_password",
+    "timeout": 10000,
     "debug": false
 }

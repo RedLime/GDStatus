@@ -2,7 +2,8 @@ CREATE TABLE `incidents` (
   `id` int(11) UNSIGNED NOT NULL,
   `message` text NOT NULL,
   `update_time` timestamp NOT NULL DEFAULT current_timestamp(),
-  `type` varchar(20) NOT NULL
+  `type` varchar(20) NOT NULL,
+  `is_automatic` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `responses` (
