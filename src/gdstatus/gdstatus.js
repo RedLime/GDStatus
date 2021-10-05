@@ -11,7 +11,7 @@ export function setConnection(conn) {
 }
 
 //Utils
-var serverIssues = 0;
+var serverIssues = 0, errorTrigger = 0;
 var updatedIssue = false;
 async function createIncident(message, type, isAuto) {
     const [[lastIncident]] = await connection.query(`SELECT type, incident_group FROM incidents ORDER BY incident_group DESC LIMIT 1`);
@@ -64,16 +64,17 @@ const cachingServer = async () => {
         timeout: config.timeout,
     }, (error, response, body) => {
         if (error || !body || body == "-1") {
+            errorTrigger++;
             if (error && error.code == 'ETIMEDOUT') {
                 connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (1, ${Date.now() - timeDate}, 1, ${Date.now()})`);
-                if (serverIssues == 0) {
-                    createIncident('The server has timed out. It will be update when the server is back.', 'solved', true);
+                if (serverIssues == 0 && errorTrigger == 3) {
+                    createIncident('The server has timed out. It will be update when the server is back.', 'issue', true);
                     serverIssues = 6;
                 }
             } else {
                 connection.query(`INSERT INTO responses (req_type, res_time, res_result, res_timestamp) VALUES (1, ${Date.now() - timeDate}, 2, ${Date.now()})`);
-                if (serverIssues == 0) {
-                    createIncident('The server is not working now. It will be update when the server is back.', 'solved', true);
+                if (serverIssues == 0 && errorTrigger == 3) {
+                    createIncident('The server is not working now. It will be update when the server is back.', 'issue', true);
                     serverIssues = 6;
                 }
             }
