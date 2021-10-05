@@ -131,7 +131,7 @@ router.get('/', async (req, res) => {
             const is_automatic = s.is_automatic.split('||')[index];
             context += `<div class="incident-type incident-type-${type}">${type}<span class="incident-date">| ${new Date(update_time).toUTCString()}</span></div>
             <div class="incident-context">${message}</div>`;
-            if (+is_automatic) context += `<small>[It was automatically generated incident]</small>`
+            if (+is_automatic) context += `<div><small>[It was automatically generated incident]</small></div>`
             context += `<br>`;
         }
         context += `</div>`;
